@@ -24,5 +24,5 @@ module.exports.parseSLName = function(name)
   else
     login = name
 
-  return [login, display]
+  return [login.trim(), display.trim()]
 }

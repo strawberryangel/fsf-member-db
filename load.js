@@ -36,6 +36,15 @@ for(r of records)
     last = new Date(year, month, day)
   }
 
-  console.log("uuid: ", uuid, "last: ", last, "name: ", login, ":", display)
+  let result = 
+  {
+    uuid: uuid,
+    lastLogin: last,
+    loginName: login,
+    displayName: display
+  }
+
+  /* console.log("uuid: ", uuid, "last: ", last, "name: ", login, ":", display) */
+  console.log(result)
 }
 
