@@ -1,6 +1,8 @@
+let assert = require('assert') 
 let mongo = MongoClient = require('mongodb').MongoClient
 let fs = require('fs') 
 let parse = require('csv-parse/lib/sync') 
+let PV = require('./pv')
 let tools = require('./tools')
 
 if(process.argv.length < 3) 
@@ -59,6 +61,7 @@ function loadFile (db, callback)
 
 function processRow(db, data) 
 {
+  pv.lock()
   let group = db.collection('groupMembers')
   let search = { _id: data.uuid } 
   group.findOne( search ).then(function(doc) {
@@ -69,27 +72,37 @@ function processRow(db, data)
 	  console.log("Insert failed: ", err)
 	else
 	  console.log("Insert succeeded:  ")
+        pv.unlock()
       })
     }
     else
     {
       console.log("Found record for ", search)
+      pv.unlock()
     }
   }).catch(function(err) {
     console.log("group.findOne failed. ", search, err)
+    pv.unlock()
   })
 }
 
 
 
+let url = "mongodb://localhost/fsf"
 let db = null
-mongo.connect("mongodb://localhost/fsf", function(err, connection) {
+let pv = new PV(function() { 
+  console.log("Closing database connection.") 
+  db.close() 
+})
+mongo.connect(url, function(err, connection) {
   if(err == null) 
   {
     db = connection
+    pv.lock()
     loadFile(db, processRow)
-    return
+    pv.unlock()
   }
   else 
     console.log("Could not connect to database: ", err)
 })
+
